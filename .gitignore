@@ -1,0 +1,19 @@
+# Ignore build artifacts and IDE files
+*.exe
+*.obj
+*.o
+*.out
+*.dll
+*.pdb
+*.log
+
+# Editor folders
+.vs/
+.vscode/
+
+# OS files
+Thumbs.db
+.DS_Store
+
+# Runtime data
+network_data.txt
