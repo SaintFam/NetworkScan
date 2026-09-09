@@ -51,6 +51,68 @@ int getIpAndMac(void)
     while (adapter)
     {
         printf("====================================================\n");
+
+        printf("Adapter Name      : %s\n", adapter->AdapterName);
+
+        wprintf(L"Friendly Name     : %ls\n", adapter->FriendlyName);
+
+        printf("MAC Address       : ");
+        for (DWORD i = 0; i < adapter->PhysicalAddressLength; i++)
+        {
+            printf("%02X", adapter->PhysicalAddress[i]);
+
+            if (i < adapter->PhysicalAddressLength - 1)
+                printf("-");
+        }
+
+        printf("\n");
+
+        { /** IP_ADAPTER_UNICAST_ADDRESS: This is a built-in Windows data structure. It holds information about a single unicast IP address  (such as an IPv4 or IPv6 address) assigned to a network interface, along with its properties (like prefix length or lease lifetime). */
+        }
+        { /** *unicast: This declares a pointer variable named unicast that points to a structure of the type mentioned above */
+        }
+
+        //---------------------------------------------------
+        // IP Addresses
+        //---------------------------------------------------
+        IP_ADAPTER_UNICAST_ADDRESS *unicast = adapter->FirstUnicastAddress;
+
+        while (unicast)
+        {
+            char addressBuffer[INET6_ADDRSTRLEN];
+
+            if (unicast->Address.lpSockaddr->sa_family == AF_INET)
+            {
+                struct sockaddr_in *ipv4 =
+                    (struct sockaddr_in *)unicast->Address.lpSockaddr;
+
+                InetNtopA(
+                    AF_INET,
+                    &(ipv4->sin_addr),
+                    addressBuffer,
+                    sizeof(addressBuffer));
+
+                printf("IPv4 Address      : %s\n", addressBuffer);
+            }
+            else if (unicast->Address.lpSockaddr->sa_family == AF_INET6)
+            {
+                struct sockaddr_in6 *ipv6 =
+                    (struct sockaddr_in6 *)unicast->Address.lpSockaddr;
+
+                InetNtopA(
+                    AF_INET6,
+                    &(ipv6->sin6_addr),
+                    addressBuffer,
+                    sizeof(addressBuffer));
+
+                printf("IPv6 Address      : %s\n", addressBuffer);
+            }
+
+            unicast = unicast->Next;
+        }
         adapter = adapter->Next;
     }
+    free(addresses); // Release the allocated memory
+
+    return 0; // Indicate success
 }
