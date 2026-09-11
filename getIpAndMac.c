@@ -75,12 +75,14 @@ int getIpAndMac(void)
         //---------------------------------------------------
         // IP Addresses
         //---------------------------------------------------
+        // Create a pointer called unicast that can point to an IP_ADAPTER_UNICAST_ADDRESS structure
+        //Create a pointer called unicast and make it point to the first unicast address belonging to this network adapter
         IP_ADAPTER_UNICAST_ADDRESS *unicast = adapter->FirstUnicastAddress;
 
         while (unicast)
         {
             char addressBuffer[INET6_ADDRSTRLEN];
-
+            //If the current address is IPv4
             if (unicast->Address.lpSockaddr->sa_family == AF_INET)
             {
                 struct sockaddr_in *ipv4 =
