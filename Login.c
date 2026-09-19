@@ -19,7 +19,7 @@ int main()
 
     if (strcmp(username, correctUsername) == 0 && strcmp(password, correctPassword) == 0)
     {
-        printf("Login successful!\n");
+        printf("successful!\n");
         getchar();
 
         // Command loop

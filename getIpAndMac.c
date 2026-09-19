@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h> // CHANGE 1: Added for malloc() and free()
 #include <WinSock2.h>
 #include <WS2tcpip.h>
 #include <iphlpapi.h>
@@ -8,7 +9,12 @@
 
 int getIpAndMac(void)
 {
-    ULONG flags = GAA_FLAG_INCLUDE_PREFIX;
+
+    printf("\n\n==============================\n");
+    printf("I AM RUNNING THE NEW getIpAndMac.c\n");
+    printf("==============================\n\n");
+
+        ULONG flags = GAA_FLAG_INCLUDE_PREFIX | GAA_FLAG_INCLUDE_GATEWAYS;
     ULONG family = AF_UNSPEC; // IPv4 + IPv6
     ULONG bufferSize = 15000;
     IP_ADAPTER_ADDRESSES *addresses = NULL; // Just Know Structure of value it will point to  The Data type of pointer but for now it is null
@@ -50,6 +56,8 @@ int getIpAndMac(void)
     adapter = addresses; // Set adapter to point to the first adapter in the list
     while (adapter)
     {
+
+        printf("\n\n***** NEW VERSION OF PROGRAM *****\n\n");
         printf("====================================================\n");
 
         printf("Adapter Name      : %s\n", adapter->AdapterName);
@@ -76,20 +84,26 @@ int getIpAndMac(void)
         // IP Addresses
         //---------------------------------------------------
         // Create a pointer called unicast that can point to an IP_ADAPTER_UNICAST_ADDRESS structure
-        //Create a pointer called unicast and make it point to the first unicast address belonging to this network adapter
+        // Create a pointer called unicast and make it point to the first unicast address belonging to this network adapter
         IP_ADAPTER_UNICAST_ADDRESS *unicast = adapter->FirstUnicastAddress;
 
         while (unicast)
         {
             char addressBuffer[INET6_ADDRSTRLEN];
-            //If the current address is IPv4
+            // Check If the current address is IPv4
             if (unicast->Address.lpSockaddr->sa_family == AF_INET)
             {
+
+                // Creates an IPv4 blueprint pointer named ipv4.
                 struct sockaddr_in *ipv4 =
+                    // Forces the compiler to change lenses and read generic data as IPv4 data.
                     (struct sockaddr_in *)unicast->Address.lpSockaddr;
 
+                // Internet Network-to-Presentation"
                 InetNtopA(
+                    // The input is an IPv4 address
                     AF_INET,
+                    // The source data. It gives the function the memory address (&) of the raw, binary IP bytes inside your IPv4 structure.
                     &(ipv4->sin_addr),
                     addressBuffer,
                     sizeof(addressBuffer));
@@ -111,6 +125,42 @@ int getIpAndMac(void)
             }
 
             unicast = unicast->Next;
+        }
+        //---------------------------------------------------
+        // Default Gateway (Router)
+        //---------------------------------------------------
+
+        IP_ADAPTER_GATEWAY_ADDRESS_LH *gateway = adapter->FirstGatewayAddress;
+        if (gateway == NULL)
+        {
+            printf("FirstGatewayAddress = NULL\n");
+        }
+        else
+        {
+            while (gateway)
+            {
+                char gatewayBuffer[INET6_ADDRSTRLEN];
+
+                getnameinfo(
+                    gateway->Address.lpSockaddr,
+                    gateway->Address.iSockaddrLength,
+                    gatewayBuffer,
+                    sizeof(gatewayBuffer),
+                    NULL,
+                    0,
+                    NI_NUMERICHOST);
+
+                if (gateway->Address.lpSockaddr->sa_family == AF_INET)
+                {
+                    printf("Gateway IPv4      : %s\n", gatewayBuffer);
+                }
+                else if (gateway->Address.lpSockaddr->sa_family == AF_INET6)
+                {
+                    printf("Gateway IPv6      : %s\n", gatewayBuffer);
+                }
+
+                gateway = gateway->Next;
+            }
         }
         adapter = adapter->Next;
     }

@@ -12,6 +12,7 @@ void run_bonjour()
 void net_scan_table()
 {
     printf("Scanning Your Ip Address And Your default GateAway");
+    printf("\n\n***** NEW VERSION OF PROGRAM *****\n\n");
     getIpAndMac();
 }
 
